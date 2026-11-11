@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Новый человек — Новичок{% endblock %}
+{% block body %}
+<header class="person-head">
+  <p class="kicker">После задачи приёма</p>
+  <h1>Вышел новый человек</h1>
+  <p class="lead">Задача приёма в Битриксе на этом заканчивается. План на 90 дней начинается здесь и живёт у руководителя, не в отделе кадров.</p>
+</header>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" action="/new" class="stack sheet">
+  <label>
+    Имя
+    <input name="name" required placeholder="Вымышленное, не из кадров">
+  </label>
+  <label>
+    Роль
+    <select name="role" required>
+      <option value="">Выберите</option>
+      {% for code, role in roles.items() %}
+        <option value="{{ code }}">{{ role.label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <ul class="hints">
+    {% for role in roles.values() %}
+      <li><strong>{{ role.label }}.</strong> {{ role.hint }}</li>
+    {% endfor %}
+  </ul>
+  <label>
+    Площадка
+    <input name="place" required list="places" placeholder="Магазин, склад, отдел, офис">
+    <datalist id="places">
+      <option value="Магазин «Север»"></option>
+      <option value="Магазин «Речной»"></option>
+      <option value="Склад «Химки»"></option>
+      <option value="Отдел продаж"></option>
+      <option value="Офис"></option>
+    </datalist>
+  </label>
+  <label>
+    Дата выхода
+    <input name="start_date" type="date" required value="{{ today }}">
+  </label>
+  <label>
+    Руководитель
+    <input name="manager" required list="managers" placeholder="Кто разберёт сигналы">
+    <datalist id="managers">
+      <option value="Ольга Семёнова"></option>
+      <option value="Игорь Пашин"></option>
+      <option value="Марина Ким"></option>
+      <option value="Алексей Берестов"></option>
+    </datalist>
+  </label>
+  <label>
+    Наставник
+    <input name="buddy" placeholder="Если пусто — на доске загорится точка «назначить»">
+  </label>
+  <button type="submit">Открыть 90 дней</button>
+</form>
+{% endblock %}

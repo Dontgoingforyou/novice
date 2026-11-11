@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ card.name }} — моя неделя{% endblock %}
+{% block body %}
+<p class="back"><a href="/p/{{ card.id }}">← карточка для руководителя</a></p>
+<header class="person-head">
+  <p class="kicker">{{ card.day_label }}</p>
+  <h1>{{ card.name }}, ваши первые недели</h1>
+  <p class="lead">{{ card.role_label }} · {{ card.place }}</p>
+  {% if card.buddy %}
+    <p>Наставник — {{ card.buddy }}. Если его нет рядом, пишите руководителю: {{ card.manager }}.</p>
+  {% else %}
+    <p class="signal">Наставник не назначен. Это не ваша ошибка. Напомните руководителю: {{ card.manager }}.</p>
+  {% endif %}
+</header>
+
+<h2>Ваши точки</h2>
+<ul class="plain">
+  {% for point in card.points if point.owner_code == 'newcomer' %}
+    <li class="state-{{ point.state }}">
+      <strong>{{ point.title }}</strong>
+      <span>день {{ point.day_offset }}, {{ point.due }}</span>
+      <span>{% if point.done %}сделано{% elif point.state == 'risk' %}срок прошёл{% elif point.state == 'today' %}сегодня{% else %}впереди{% endif %}</span>
+    </li>
+  {% else %}
+    <li>На вас сейчас ничего не висит.</li>
+  {% endfor %}
+</ul>
+
+<h2>Что ещё не закрыли другие</h2>
+<ul class="plain">
+  {% for point in card.points if point.owner_code != 'newcomer' and not point.done and point.state != 'upcoming' and point.kind != 'checkin' %}
+    <li>
+      <strong>{{ point.title }}</strong>
+      <span>{{ point.owner }}</span>
+      <span>день {{ point.day_offset }}</span>
+    </li>
+  {% else %}
+    <li>Чужих открытых точек нет.</li>
+  {% endfor %}
+</ul>
+
+{% for point in card.points if point.open_checkin %}
+  <h2>Короткий разговор, день {{ point.day_offset }}</h2>
+  <p>Три вопроса. Ответ видит руководитель и, если что-то не так, обязан написать, что с этим сделал.</p>
+  {% set day_offset = point.day_offset %}
+  {% set next_url = 'my' %}
+  {% include "checkin_form.html" %}
+{% endfor %}
+{% endblock %}

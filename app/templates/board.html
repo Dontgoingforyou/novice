@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Доска — Новичок{% endblock %}
+{% block body %}
+<section class="intro">
+  <p class="kicker">{{ today }}</p>
+  {% if manager %}
+    <h1>{{ manager }}</h1>
+    <p class="lead">
+      {% if total == 0 %}
+        В первые 90 дней никого нет.
+      {% elif act %}
+        На доске {{ total }}. Разобрать сейчас: {{ act }}.
+        Каждый третий ушедший не дорабатывает до трёх месяцев — эти карточки про это.
+      {% else %}
+        На доске {{ total }}. Сейчас никто не горит. Имеет смысл глянуть тех, у кого точка сегодня.
+      {% endif %}
+    </p>
+  {% else %}
+    <h1>Все руководители</h1>
+    <p class="lead">
+      На доске {{ total }}. Разобрать сейчас: {{ act }}.
+      Приём и увольнение живут задачами в Битриксе. Здесь — промежуток между ними.
+    </p>
+  {% endif %}
+</section>
+
+<nav class="switch" aria-label="Руководитель">
+  <a href="/?manager=all" {% if not manager %}class="is-on"{% endif %}>Все</a>
+  {% for name in managers %}
+    <a href="/?manager={{ name | urlencode }}" {% if manager == name %}class="is-on"{% endif %}>{{ name }}</a>
+  {% endfor %}
+</nav>
+
+{% if groups.act %}
+  <h2>Разобрать сейчас</h2>
+  <div class="cards">
+    {% for card in groups.act %}
+      {% include "card.html" %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if groups.today %}
+  <h2>Точка сегодня</h2>
+  <div class="cards">
+    {% for card in groups.today %}
+      {% include "card.html" %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% if groups.ok %}
+  <h2>Идут по плану</h2>
+  <div class="cards">
+    {% for card in groups.ok %}
+      {% include "card.html" %}
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

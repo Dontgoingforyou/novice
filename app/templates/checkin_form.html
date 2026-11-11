@@ -1,0 +1,26 @@
+<form method="post" action="/p/{{ card.id }}/checkins/{{ day_offset }}" class="stack">
+  <input type="hidden" name="next_url" value="{{ next_url }}">
+  <fieldset>
+    <legend>Понимаете, чего от вас ждут на этой неделе?</legend>
+    {% for value, label in answers.understands.items() %}
+      <label class="choice"><input type="radio" name="understands" value="{{ value }}" required> {{ label }}</label>
+    {% endfor %}
+  </fieldset>
+  <fieldset>
+    <legend>Знаете, к кому идти, если застряли?</legend>
+    {% for value, label in answers.knows_who.items() %}
+      <label class="choice"><input type="radio" name="knows_who" value="{{ value }}" required> {{ label }}</label>
+    {% endfor %}
+  </fieldset>
+  <fieldset>
+    <legend>Хотите доработать здесь до конца испытательного?</legend>
+    {% for value, label in answers.wants_stay.items() %}
+      <label class="choice"><input type="radio" name="wants_stay" value="{{ value }}" required> {{ label }}</label>
+    {% endfor %}
+  </fieldset>
+  <label>
+    Что сказали своими словами
+    <textarea name="note" rows="3" placeholder="Необязательно, но по этой фразе потом видно, что делать"></textarea>
+  </label>
+  <button type="submit">Записать разговор</button>
+</form>

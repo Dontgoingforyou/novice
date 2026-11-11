@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ card.name }} — Новичок{% endblock %}
+{% block body %}
+<p class="back"><a href="/?manager={{ card.manager | urlencode }}">← {{ card.manager }}</a></p>
+{% if error %}
+  <p class="error">{{ error }}</p>
+{% endif %}
+
+<header class="person-head">
+  <p class="kicker">{{ card.day_label }} · с {{ card.start }}</p>
+  <h1>{{ card.name }}</h1>
+  <p class="lead">{{ card.role_label }} · {{ card.place }}</p>
+  <p class="meta">
+    Руководитель: {{ card.manager }}.
+    {% if card.buddy %}Наставник: {{ card.buddy }}.{% else %}Наставник не назначен.{% endif %}
+  </p>
+</header>
+
+<section class="panel tone-{{ card.tone }}">
+  <h2>{% if card.signals %}Почему на доске{% else %}На доске тихо{% endif %}</h2>
+  {% if card.signals %}
+    <ul class="signals">
+      {% for signal in card.signals %}
+        <li>{{ signal.text }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Просроченных точек нет, тревожных ответов нет. Следующая точка видна в плане ниже.</p>
+  {% endif %}
+</section>
+
+<ol class="plan">
+  {% for point in card.points %}
+    <li class="point state-{{ point.state }}">
+      <div class="point-mark" aria-hidden="true"></div>
+      <div>
+        <p class="point-due">День {{ point.day_offset }} · {{ point.due }} · {{ point.owner }}</p>
+        <h3>{{ point.title }}</h3>
+        <p>{{ point.detail }}</p>
+
+        {% if point.kind == 'task' and point.done %}
+          <p class="done-label">Сделано</p>
+        {% elif point.code == 'buddy' and not point.done %}
+          <form method="post" action="/p/{{ card.id }}/buddy" class="inline">
+            <label>
+              Имя наставника
+              <input name="buddy_name" required placeholder="Кто ведёт первую неделю">
+            </label>
+            <button type="submit">Назначить</button>
+          </form>
+        {% elif point.kind == 'task' and not point.done and point.state != 'upcoming' %}
+          <form method="post" action="/p/{{ card.id }}/checkpoints/{{ point.id }}/done">
+            <button type="submit">Сделано</button>
+          </form>
+        {% elif point.kind == 'checkin' and point.checkin %}
+          <dl class="answers">
+            <div><dt>Понимает, чего ждут</dt><dd>{{ point.checkin.understands }}</dd></div>
+            <div><dt>Знает, к кому идти</dt><dd>{{ point.checkin.knows_who }}</dd></div>
+            <div><dt>Хочет остаться</dt><dd>{{ point.checkin.wants_stay }}</dd></div>
+          </dl>
+          {% if point.checkin.note %}<p class="note">{{ point.checkin.note }}</p>{% endif %}
+          {% if point.checkin.resolved %}
+            <p class="done-label">Разобрали: {{ point.checkin.resolved_note }}</p>
+          {% elif point.checkin.negative %}
+            <form method="post" action="/p/{{ card.id }}/checkins/{{ point.day_offset }}/resolve" class="stack">
+              <label>
+                Что сделали по этому ответу
+                <textarea name="resolved_note" required rows="3" placeholder="Например: передал десяток клиентов и назвал, кто ведёт сети"></textarea>
+              </label>
+              <button type="submit">Сигнал разобран</button>
+            </form>
+          {% endif %}
+        {% elif point.open_checkin %}
+          {% set day_offset = point.day_offset %}
+          {% set next_url = '' %}
+          {% include "checkin_form.html" %}
+        {% elif point.kind == 'decision' and point.done %}
+          <p class="done-label">{{ point.result }}</p>
+          {% if point.result == 'Ещё месяц с планом' %}
+            <p class="note">Решение записано. Отдельный план на этот месяц сюда пока не строится.</p>
+          {% endif %}
+        {% elif point.open_decision %}
+          <form method="post" action="/p/{{ card.id }}/checkpoints/{{ point.id }}/decision" class="choices">
+            {% for value, label in decisions.items() %}
+              <button type="submit" name="result" value="{{ value }}">{{ label }}</button>
+            {% endfor %}
+          </form>
+        {% endif %}
+      </div>
+    </li>
+  {% endfor %}
+</ol>
+
+<p class="aside"><a href="/p/{{ card.id }}/my">Как это видит {{ card.name }}</a></p>
+{% endblock %}

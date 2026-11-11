@@ -1,0 +1,13 @@
+<article class="card tone-{{ card.tone }}">
+  <p class="card-day">{{ card.day_label }}</p>
+  <h3><a href="/p/{{ card.id }}">{{ card.name }}</a></h3>
+  <p class="meta">{{ card.role_label }} · {{ card.place }}</p>
+  <p class="meta">
+    {% if card.buddy %}Наставник: {{ card.buddy }}{% else %}Наставник не назначен{% endif %}
+  </p>
+  <p class="signal">{{ card.headline }}</p>
+  {% if card.signals | length > 1 %}
+    <p class="more">Ещё {{ card.signals | length - 1 }}</p>
+  {% endif %}
+  <a class="button" href="/p/{{ card.id }}">{% if card.bucket == 'ok' %}Открыть{% else %}Разобрать{% endif %}</a>
+</article>
